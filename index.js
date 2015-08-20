@@ -282,8 +282,8 @@ module.exports = function math_plugin(md, options) {
   var math_inline_displayed = makeMath_inline_displayed(blockOpen, blockClose);
   var math_block = makeMath_block(blockOpen, blockClose);
 
+  md.inline.ruler.before('escape', 'math_inline_displayed', math_inline_displayed); // must be before math_inline
   md.inline.ruler.before('escape', 'math_inline', math_inline);
-  md.inline.ruler.before('escape', 'math_inline_displayed', math_inline_displayed);
   md.block.ruler.after('blockquote', 'math_block', math_block);
 
   md.renderer.rules.math_inline = inlineRenderer;
