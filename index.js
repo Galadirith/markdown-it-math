@@ -111,6 +111,67 @@ function makeMath_inline(open, close) {
   };
 }
 
+function makeMath_inline_displayed(open, close) {
+  return function math_inline_displayed(state, silent) {
+    var startCount,
+        found,
+        res,
+        token,
+        closeDelim,
+        max = state.posMax,
+        start = state.pos,
+        openDelim = state.src.slice(start, start + open.length);
+
+    if (openDelim !== open) { return false; }
+    if (silent) { return false; }    // Don’t run any pairs in validation mode
+
+    res = scanDelims(state, start + open.length);
+    startCount = res.delims;
+
+    if (!res.can_open) {
+      state.pos += startCount;
+      // Earlier we checked !silent, but this implementation does not need it
+      state.pending += state.src.slice(start, state.pos);
+      return true;
+    }
+
+    state.pos = start + open.length;
+
+    while (state.pos < max) {
+      closeDelim = state.src.slice(state.pos, state.pos + close.length);
+      if (closeDelim === close) {
+        res = scanDelims(state, state.pos + close.length);
+        if (res.can_close) {
+          found = true;
+          break;
+        }
+      }
+
+      state.md.inline.skipToken(state);
+    }
+
+    if (!found) {
+      // Parser failed to find ending tag, so it is not a valid math
+      state.pos = start;
+      return false;
+    }
+
+    // Found!
+    state.posMax = state.pos;
+    state.pos = start + close.length;
+
+    // Earlier we checked !silent, but this implementation does not need it
+    token = state.push('math_inline_displayed', 'math', 0);
+    token.content = state.src.slice(state.pos, state.posMax);
+    token.markup = open;
+
+    state.pos = state.posMax + close.length;
+    state.posMax = max;
+
+    return true;
+  };
+}
+
 function makeMath_block(open, close) {
   return function math_block(state, startLine, endLine, silent) {
     var openDelim, len, params, nextLine, token,
@@ -217,14 +278,15 @@ module.exports = function math_plugin(md, options) {
       makeMathRenderer(Object.assign({ display: 'block' },
                                      options.renderingOptions));
 
-  var math_inline_displayed = makeMath_inline(blockOpen, blockClose);
   var math_inline = makeMath_inline(inlineOpen, inlineClose);
+  var math_inline_displayed = makeMath_inline_displayed(blockOpen, blockClose);
   var math_block = makeMath_block(blockOpen, blockClose);
 
-  md.inline.ruler.before('escape', 'math_inline_displayed', math_inline_displayed);
   md.inline.ruler.before('escape', 'math_inline', math_inline);
+  md.inline.ruler.before('escape', 'math_inline_displayed', math_inline_displayed);
   md.block.ruler.after('blockquote', 'math_block', math_block);
-  md.renderer.rules.math_inline_displayed = inlineDisplayedRenderer;
+
   md.renderer.rules.math_inline = inlineRenderer;
+  md.renderer.rules.math_inline_displayed = inlineDisplayedRenderer;
   md.renderer.rules.math_block = blockRenderer;
 };
