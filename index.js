@@ -205,6 +205,11 @@ module.exports = function math_plugin(md, options) {
           return options.inlineRenderer(tokens[idx].content);
         } :
       makeMathRenderer(options.renderingOptions);
+  var inlineDisplayedRenderer = options.blockRenderer ?
+        function(tokens, idx) {
+          return options.blockRenderer(tokens[idx].content);
+        } :
+      makeMathRenderer(options.renderingOptions);
   var blockRenderer = options.blockRenderer ?
         function(tokens, idx) {
           return options.blockRenderer(tokens[idx].content) + '\n';
@@ -212,11 +217,14 @@ module.exports = function math_plugin(md, options) {
       makeMathRenderer(Object.assign({ display: 'block' },
                                      options.renderingOptions));
 
+  var math_inline_displayed = makeMath_inline(blockOpen, blockClose);
   var math_inline = makeMath_inline(inlineOpen, inlineClose);
   var math_block = makeMath_block(blockOpen, blockClose);
 
+  md.inline.ruler.before('escape', 'math_inline_displayed', math_inline_displayed);
   md.inline.ruler.before('escape', 'math_inline', math_inline);
   md.block.ruler.after('blockquote', 'math_block', math_block);
+  md.renderer.rules.math_inline_displayed = inlineDisplayedRenderer;
   md.renderer.rules.math_inline = inlineRenderer;
   md.renderer.rules.math_block = blockRenderer;
 };
