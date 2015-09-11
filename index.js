@@ -125,7 +125,7 @@ function makeMath_inline(open, close) {
   };
 }
 
-function makeMath_block(open, close) {
+function makeMath_block(open, close, noEmptyLines) {
   return function math_block(state, startLine, endLine, silent) {
     var openDelim, len, params, nextLine, token, firstLine, lastLine, lastLinePos,
         haveEndMarker = false,
@@ -162,6 +162,10 @@ function makeMath_block(open, close) {
         // unclosed block should be autoclosed by end of document.
         // also block seems to be autoclosed by end of parent
         break;
+      }
+
+      if (state.isEmpty(nextLine) && noEmptyLines) {
+        return false;
       }
 
       pos = state.bMarks[nextLine] + state.tShift[nextLine];
@@ -235,7 +239,8 @@ module.exports = function math_plugin(md, options) {
   var inlineOpen = options.inlineOpen || '$$',
       inlineClose = options.inlineClose || '$$',
       blockOpen = options.blockOpen || '$$$',
-      blockClose = options.blockClose || '$$$';
+      blockClose = options.blockClose || '$$$',
+      noEmptyLines = options.noEmptyLines || false;
   var inlineRenderer = options.inlineRenderer ?
         function(tokens, idx) {
           return options.inlineRenderer(tokens[idx].content);
@@ -249,7 +254,7 @@ module.exports = function math_plugin(md, options) {
                                      options.renderingOptions));
 
   var math_inline = makeMath_inline(inlineOpen, inlineClose);
-  var math_block = makeMath_block(blockOpen, blockClose);
+  var math_block = makeMath_block(blockOpen, blockClose, noEmptyLines);
 
   md.inline.ruler.before('escape', 'math_inline', math_inline);
   md.block.ruler.after('blockquote', 'math_block', math_block, {
