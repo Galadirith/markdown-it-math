@@ -268,4 +268,8 @@ module.exports = function math_plugin(md, options) {
   });
   md.renderer.rules.math_inline = inlineRenderer;
   md.renderer.rules.math_block = blockRenderer;
+
+  md.block.ruler.at('table', require('./lib/table'), {
+    alt: [ 'paragraph', 'reference' ]
+  });
 };
