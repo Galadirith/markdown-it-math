@@ -40,7 +40,7 @@
     "babelify": "^6.3.0",
     "browserify": "^11.1.0",
     "eslint": "^1.4.3",
-    "markdown-it": "^4.1.0",
+    "markdown-it": "^5.1.0",
     "markdown-it-testgen": "^0.1.4",
     "mocha": "^2.3.2",
     "texzilla": "^0.9.9",
