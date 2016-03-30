@@ -68,18 +68,3 @@ describe("Renderer", function() {
     assert.equal(res2, '<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo lspace="0em" rspace="0em">sin</mo><mo stretchy="false">(</mo><mn>2</mn><mi>π</mi><mo stretchy="false">)</mo></mrow><annotation encoding="TeX">\\sin(2\\pi)\n</annotation></semantics></math>\n');
   });
 });
-
-describe("Parsing pipe inside inline maths delimiters `$`", function() {
-  it('Should not delimit a column of a table', function() {
-    var md = require('markdown-it')()
-          .use(require('../'), {
-            inlineOpen: '$',
-            inlineClose: '$',
-            blockOpen: '$$',
-            blockClose: '$$'
-          });
-
-    var res1 = md.render('col a | col b\n--|--\n$P(A|B)$ | foo');
-    assert.equal(res1, '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><math><mi>P</mi><mfenced open="(" close=")"><mrow><mi>A</mi><mo stretchy="true">|</mo><mi>B</mi></mrow></mfenced></math></td>\n<td>foo</td>\n</tr>\n</tbody>\n</table>\n');
-  })
-});
