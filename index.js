@@ -269,7 +269,18 @@ module.exports = function math_plugin(md, options) {
   md.renderer.rules.math_inline = inlineRenderer;
   md.renderer.rules.math_block = blockRenderer;
 
-  md.block.ruler.at('table', require('./lib/table'), {
+  // Push configuration options to MarkdownIt instance
+  md.math = typeof md.math === 'object' ? md.math : [];
+  md.math.push({
+    inlineOpen: inlineOpen,
+    inlineClose: inlineClose,
+    blockOpen: blockOpen,
+    blockClose: blockClose
+  });
+
+  // Replace existing table parser with parser that respects new inline delims
+  var table_block = require('./lib/table')(md);
+  md.block.ruler.at('table', table_block, {
     alt: [ 'paragraph', 'reference' ]
   });
 };
