@@ -33,9 +33,6 @@
     "url": "https://github.com/runarberg/markdown-it-math/issues"
   },
   "homepage": "https://github.com/runarberg/markdown-it-math",
-  "optionalDependencies": {
-    "ascii2mathml": "^0.5.3"
-  },
   "devDependencies": {
     "babelify": "^6.3.0",
     "browserify": "^11.1.0",
