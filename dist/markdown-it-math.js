@@ -435,8 +435,9 @@ function makeMath_inline(delims) {
 
 function makeMath_block(delims) {
   return function math_block(state, startLine, endLine, silent) {
-    var len, params, nextLine, token, firstLine, lastLine, lastLinePos,
+    var len, params, nextLine, token, firstLine, lastLine, lastLinePos, closeDelim,
         haveEndMarker = false,
+        closeStartsAtNewline = false,
         pos = state.bMarks[startLine] + state.tShift[startLine],
         max = state.eMarks[startLine];
 
@@ -448,7 +449,12 @@ function makeMath_block(delims) {
     var open = foundDelims[0],
         close = foundDelims[1];
 
-    if (pos + open.length > max) { return false; }
+    if (close[0] === '\n') {
+      closeStartsAtNewline = true;
+      close = close.slice(1);
+    }
+
+    if (pos + open.length > max + 1) { return false; }
 
     pos += open.length;
     firstLine = state.src.slice(pos, max);
@@ -484,7 +490,11 @@ function makeMath_block(delims) {
         break;
       }
 
-      if (state.src.slice(pos, max).trim().slice(-close.length) !== close) {
+      closeDelim = closeStartsAtNewline
+        ? state.src.slice(pos, max).trim()
+        : state.src.slice(pos, max).trim().slice(-close.length);
+
+      if (closeDelim !== close) {
         continue;
       }
 
