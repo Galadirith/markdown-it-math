@@ -6,30 +6,26 @@ describe('Options', function() {
   it('Should allow single-double `$` as delimiters', function() {
     var md = require('markdown-it')()
           .use(require('../'), {
-            inlineOpen: '$',
-            inlineClose: '$',
-            blockOpen: '$$',
-            blockClose: '$$'
+            inlineDelim: [ [ '$', '$' ] ],
+            blockDelim: [ [ '$$', '$$' ] ]
           });
 
     var res1 = md.render('$1+1 = 2$');
     var res2 = md.render('$$\n1+1 = 2\n$$');
-    assert.equal(res1, '<p><math><mrow><mn>1</mn><mo>+</mo><mn>1</mn></mrow><mo>=</mo><mn>2</mn></math></p>\n');
-    assert.equal(res2, '<math display="block"><mrow><mn>1</mn><mo>+</mo><mn>1</mn></mrow><mo>=</mo><mn>2</mn></math>\n');
+    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n');
+    assert.equal(res2, '<div class="math block">1+1 = 2\n</div>\n');
   });
   it('Should allow LaTeX style delimiters', function() {
     var md = require('markdown-it')()
           .use(require('../'), {
-            inlineOpen: '\\(',
-            inlineClose: '\\)',
-            blockOpen: '\\[',
-            blockClose: '\\]'
+            inlineDelim: [ [ '\\(', '\\)' ] ],
+            blockDelim: [ [ '\\[', '\\]' ] ]
           });
 
     var res1 = md.render('\\(1+1 = 2\\)'),
         res2 = md.render('\\[\n1+1 = 2\n\\]');
-    assert.equal(res1, '<p><math><mrow><mn>1</mn><mo>+</mo><mn>1</mn></mrow><mo>=</mo><mn>2</mn></math></p>\n');
-    assert.equal(res2, '<math display="block"><mrow><mn>1</mn><mo>+</mo><mn>1</mn></mrow><mo>=</mo><mn>2</mn></math>\n');
+    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n');
+    assert.equal(res2, '<div class="math block">1+1 = 2\n</div>\n');
   });
 });
 
@@ -41,10 +37,10 @@ describe("Rendering options", function() {
           });
 
     var res1 = md.render("$$40,2$$");
-    assert.equal(res1, '<p><math><mn>40,2</mn></math></p>\n');
+    assert.equal(res1, '<p><span class="math inline">40,2</span></p>\n');
 
     var res2 = md.render("$$$\n40,2\n$$$");
-    assert.equal(res2, '<math display="block"><mn>40,2</mn></math>\n');
+    assert.equal(res2, '<div class="math block">40,2\n</div>\n');
   });
 });
 

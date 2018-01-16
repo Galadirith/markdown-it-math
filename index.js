@@ -228,7 +228,7 @@ function makeMathRenderer(renderingOptions) {
     } catch (e) {
       return renderingOptions && renderingOptions.display === 'block' ?
         function(tokens, idx) {
-          return '<div class="math block">' + tokens[idx].content + '</div>';
+          return '<div class="math block">' + tokens[idx].content + '</div>\n';
         } :
         function(tokens, idx) {
           return '<span class="math inline">' + tokens[idx].content + '</span>';
