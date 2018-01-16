@@ -27,6 +27,46 @@ describe('Options', function() {
     assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n');
     assert.equal(res2, '<div class="math block">1+1 = 2\n</div>\n');
   });
+  it('Should allow newline in opening block delimiters', function() {
+    var md = require('markdown-it')()
+          .use(require('../'), {
+            inlineDelim: [ [ '$$', '$$' ] ],
+            blockDelim: [ [ '$$\n', '$$' ] ]
+          });
+
+    var res1 = md.render('$$1+1 = 2$$'),
+        res2 = md.render('$$\n1+1 = 2$$');
+    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n');
+    assert.equal(res2, '<div class="math block">1+1 = 2</div>\n');
+  });
+  it('Should allow newline in closing block delimiters', function() {
+    var md = require('markdown-it')()
+          .use(require('../'), {
+            inlineDelim: [ [ '$$', '$$' ] ],
+            blockDelim: [ [ '$$\n', '\n$$' ] ]
+          });
+
+    var res1 = md.render('$$1+1 = 2$$'),
+        res2 = md.render('$$\n1+1 = 2$$'),
+        res3 = md.render('$$\n1+1 = 2\n$$');
+    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n');
+    assert.equal(res2, '<div class="math block">1+1 = 2$$</div>\n');
+    assert.equal(res3, '<div class="math block">1+1 = 2\n</div>\n');
+  });
+  it('Should only support singular newlines in block math closing tags', function() {
+    var md = require('markdown-it')()
+          .use(require('../'), {
+            inlineDelim: [ [ '$$', '$$' ] ],
+            blockDelim: [ [ '$$\n', '\n\n$$' ] ]
+          });
+
+    var res1 = md.render('$$1+1 = 2$$'),
+        res2 = md.render('$$\n1+1 = 2$$'),
+        res3 = md.render('$$\n1+1 = 2\n\n$$');
+    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n');
+    assert.equal(res2, '<div class="math block">1+1 = 2$$</div>\n');
+    assert.equal(res3, '<div class="math block">1+1 = 2\n\n$$</div>\n');
+  });
 });
 
 describe("Rendering options", function() {
