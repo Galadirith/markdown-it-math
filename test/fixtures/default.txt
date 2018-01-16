@@ -248,3 +248,25 @@ $$$
 1
 $$$</p>
 .
+
+Display math must start on newline
+.
+Foo $$$
+1+1=2
+.
+<p>Foo $$$
+1+1=2</p>
+.
+
+Display math must end on newline
+.
+Foo
+$$$
+1+1=2
+$$$ bar
+.
+<p>Foo</p>
+<div class="math block">1+1=2
+$$$ bar
+</div>
+.
