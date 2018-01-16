@@ -64,7 +64,7 @@ function scanDelims(state, start, delimLength) {
 }
 
 
-function makeMath_inline(open, close) {
+function makeMath_inline(delims) {
   return function math_inline(state, silent) {
     var startCount,
         found,
@@ -72,13 +72,17 @@ function makeMath_inline(open, close) {
         token,
         closeDelim,
         max = state.posMax,
-        start = state.pos,
-        openDelim = state.src.slice(start, start + open.length);
-
-    if (openDelim !== open) { return false; }
+        start = state.pos;
+    var foundDelims = delims.find(function(i) {
+      var open = i[0], openDelim = state.src.slice(start, start + open.length);
+      return openDelim === open;
+    });
+    if (!foundDelims) { return false; }
+    var open = foundDelims[0],
+        close = foundDelims[1];
     if (silent) { return false; }    // Don’t run any pairs in validation mode
 
-    res = scanDelims(state, start, openDelim.length);
+    res = scanDelims(state, start, open.length);
     startCount = res.delims;
 
     if (!res.can_open) {
@@ -125,18 +129,22 @@ function makeMath_inline(open, close) {
   };
 }
 
-function makeMath_block(open, close) {
+function makeMath_block(delims) {
   return function math_block(state, startLine, endLine, silent) {
-    var openDelim, len, params, nextLine, token, firstLine, lastLine, lastLinePos,
+    var len, params, nextLine, token, firstLine, lastLine, lastLinePos,
         haveEndMarker = false,
         pos = state.bMarks[startLine] + state.tShift[startLine],
         max = state.eMarks[startLine];
 
+    var foundDelims = delims.find(function(i) {
+      var open = i[0], openDelim = state.src.slice(pos, pos + open.length);
+      return openDelim === open;
+    });
+    if (!foundDelims) { return false; }
+    var open = foundDelims[0],
+        close = foundDelims[1];
+
     if (pos + open.length > max) { return false; }
-
-    openDelim = state.src.slice(pos, pos + open.length);
-
-    if (openDelim !== open) { return false; }
 
     pos += open.length;
     firstLine = state.src.slice(pos, max);
@@ -243,10 +251,8 @@ function makeMathRenderer(renderingOptions) {
 module.exports = function math_plugin(md, options) {
   // Default options
   options = typeof options === 'object' ? options : {};
-  var inlineOpen = options.inlineOpen || '$$',
-      inlineClose = options.inlineClose || '$$',
-      blockOpen = options.blockOpen || '$$$',
-      blockClose = options.blockClose || '$$$';
+  var inlineDelim = options.inlineDelim || [ [ '$$', '$$' ] ],
+      blockDelim = options.blockDelim || [ [ '$$$', '$$$' ] ];
   var inlineRenderer = options.inlineRenderer ?
         function(tokens, idx) {
           return options.inlineRenderer(tokens[idx].content);
@@ -259,8 +265,8 @@ module.exports = function math_plugin(md, options) {
       makeMathRenderer(Object.assign({ display: 'block' },
                                      options.renderingOptions));
 
-  var math_inline = makeMath_inline(inlineOpen, inlineClose);
-  var math_block = makeMath_block(blockOpen, blockClose);
+  var math_inline = makeMath_inline(inlineDelim);
+  var math_block = makeMath_block(blockDelim);
 
   md.inline.ruler.before('escape', 'math_inline', math_inline);
   md.block.ruler.after('blockquote', 'math_block', math_block, {
@@ -272,10 +278,8 @@ module.exports = function math_plugin(md, options) {
   // Push configuration options to MarkdownIt instance
   md.math = typeof md.math === 'object' ? md.math : [];
   md.math.push({
-    inlineOpen: inlineOpen,
-    inlineClose: inlineClose,
-    blockOpen: blockOpen,
-    blockClose: blockClose
+    inlineDelim: inlineDelim,
+    blockDelim: blockDelim
   });
 
   // Replace existing table parser with parser that respects new inline delims
