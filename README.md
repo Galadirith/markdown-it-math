@@ -1,8 +1,7 @@
 markdown-it-math
 ================
 
-[![npm](https://img.shields.io/npm/v/markdown-it-math.svg)](https://www.npmjs.com/package/markdown-it-math)
-[![Build Status](https://travis-ci.org/runarberg/markdown-it-math.svg?branch=master)](https://travis-ci.org/runarberg/markdown-it-math)
+**NOTICE:** Code from this repository was directly incorporated into [markdown-preview-plus](https://github.com/atom-community/markdown-preview-plus). Since it's diverged quite heavily from upstream, and porting changes from upstream is infeasible, there's little reason to keep this repository separate from MPP. Hence, this repository is archived.
 
 ```md
 Pythagoran theorem is $$a^2 + b^2 = c^2$$.
